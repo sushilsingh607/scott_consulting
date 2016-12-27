@@ -1,28 +1,27 @@
 <?php 
 class Database {
 	// The database connection
-    public $connection;
+    protected static $connection;
 
     /**
      * Connect to the database
      * 
      * @return bool false on failure / mysqli MySQLi object instance on success
      */
-    public function connect() {
+    public function connect() {    
         // Try and connect to the database
-        if(isset($connection)) {
+        if(!isset(self::$connection)) {
             // Load configuration as an array. Use the actual location of your configuration file
-            $config = parse_ini_file('config.ini');
-            $connection = new mysqli($config['host'], $config['username'], $config['password'], $config['database']);
+            $config = parse_ini_file('./config.ini'); 
+            self::$connection = new mysqli('localhost',$config['username'],$config['password'],$config['dbname']);
         }
-		
-		// Check for connection error
-		if ($connection->connect_error) {
-			echo "Connection Failed";
-			return false;
-		} else {
-			return $connection;
-		}
+
+        // If connection was not successful, handle the error
+        if(self::$connection === false) {
+            // Handle error - notify administrator, log to a file, show an error screen, etc.
+            return false;
+        }
+        return self::$connection;
     }
 
     /**
@@ -34,11 +33,10 @@ class Database {
     public function query($query) {
         // Connect to the database
         $connection = $this->connect();
-        
+
         // Query the database
         $result = $connection->query($query);
-        
-        // Return the result
+
         return $result;
     }
 
@@ -49,32 +47,12 @@ class Database {
      * @return bool False on failure / array Database rows on success
      */
     public function select($query) {
-        // Query
-        $result = $this->query($query);
-		
-		// Check for query result
-        if($result === false) {
-			return false;
-        }
-        
-        // Loop and store the data in array
         $rows = array();
-        while ($row = $result->fetch_assoc()) {
-            $rows[] = $row;
+        $result = $this->query($query);
+        if($result === false) {
+            return false;
         }
-        
-        // Return the rows
-        return $rows;
-    }
-
-    /**
-     * Fetch the last error from the database
-     * 
-     * @return string Database error message
-     */
-    public function error() {
-        $connection = $this->connect();
-        return $connection->error;
+        return $result;
     }
 }
 ?>

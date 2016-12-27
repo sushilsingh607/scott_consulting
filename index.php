@@ -11,16 +11,6 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   </head>
   <body>
-		<!-- Load the database class -->
-		<?php 
-		include_once('Database.php');
-		$db = new Database();
-		$users_data = $db->select('SELECT u.id, CONCAT( u.first_name, " ", u.last_name ) AS name, GROUP_CONCAT( t.name SEPARATOR ", " ) AS teams
-									FROM users u
-									LEFT JOIN teams_users AS tu ON u.id = tu.user_id
-									LEFT JOIN teams AS t ON tu.team_id = t.id
-									GROUP BY u.id​');
-		?>
         <table class = "table table-striped table-response table-bordered table-hover" style="border-radius: 5px;width: 50%;margin: 10% auto;float: none;">
 			<thead>
 				<tr>
@@ -30,26 +20,29 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr>
-					<td class="col-md-2">1</td>
-					<td class="col-md-3">Sushil Singh</td>
-					<td class="col-md-4">Team 2, Team 1</td>
-				</tr>
-				<tr>
-					<td class="col-md-2">2</td>
-					<td class="col-md-3">Sonu Garg</td>
-					<td class="col-md-4">Team 1</td>
-				</tr>
-				<tr>
-					<td class="col-md-2">3</td>
-					<td class="col-md-3">Saurabh Dixit</td>
-					<td class="col-md-4">Team 3, Team 2</td>
-				</tr>
-				<tr>
-					<td class="col-md-2">4</td>
-					<td class="col-md-3">Nitish Kansal</td>
-					<td class="col-md-4">Team 4</td>
-				</tr>
+				<!-- Load the database class -->
+				<?php include_once('Database.php'); ?>
+				<?php $db = new Database(); ?>
+				<?php 
+					$users_data = $db->select('SELECT u.id, CONCAT( u.first_name, " ", u.last_name ) AS name, GROUP_CONCAT( t.name SEPARATOR ", " ) AS teams
+												FROM users u
+												LEFT JOIN teams_users AS tu ON u.id = tu.user_id
+												LEFT JOIN teams AS t ON tu.team_id = t.id
+												GROUP BY u.id​');
+					// check for empty data
+					if ($result->num_rows > 0) {
+						// output data of each row
+						while($row = $users_data->fetch_assoc()) {
+							echo  '<tr>' . 
+									'<td class="col-md-2">'. $row['id'] . '</td>' . 
+									'<td class="col-md-3">'. $row['name'] . '</td>' . 
+									'<td class="col-md-4">'. $row['teams'] . '</td>' .
+								  '</tr>';
+						}
+					} else {
+						echo "0 results";
+					}
+				?>
 			</tbody>
 		</table>
 	</body>
